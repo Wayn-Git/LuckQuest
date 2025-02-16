@@ -1,76 +1,132 @@
-# Telecom Management System
+# 🎰 Casino Game System
 
-## Overview
+A console-based casino simulation developed in C with user management and gaming features.
 
-The **Telecom Management System** is a user management and billing system that allows both users and admins to manage accounts and balances. This system supports login, user registration, balance view and modification, and admin functionalities. It is designed to handle basic telecom-related functionalities such as user account creation, balance tracking, and administrative actions like modifying user balances.
+![Casino Demo](https://via.placeholder.com/800x400.png?text=Casino+Game+System+Demo) *Example screenshot placeholder*
 
-## Features
+## 📋 Table of Contents
+- [Features](#-features)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Game Details](#-game-details)
+- [Technical Specs](#-technical-specs)
+- [Future Plans](#-future-plans)
 
-- **User Registration:** Allows users to register with a username, password, and a role (user/admin).
-- **Login System:** Provides a secure login mechanism for both regular users and administrators.
-- **Balance Management:** Users can view their current balance, and administrators can modify the balance for any user.
-- **Admin Panel:** Admins have access to additional features, such as viewing and modifying user balances.
+## 🚀 Features
 
-## Technologies Used
+### 👤 User System
+- Secure registration with password validation
+- Unique username enforcement (3-20 characters)
+- Persistent user profiles stored in `users.txt`
+- Password requirements:
+  - Minimum 8 characters
+  - At least 1 uppercase letter
+  - At least 1 lowercase letter
+  - At least 1 number
 
-- **C Programming Language** - The entire system is written in C for simplicity and performance.
-- **File Handling** - The system uses file handling to store user data, including usernames, passwords, roles, and balances.
-- **Standard Libraries** - The program uses standard C libraries like `stdio.h` and `string.h` for input/output and string manipulation.
+### 🎮 Gaming
+- **Coin Flip Game** (Currently Available):
+  - Heads/Tails guessing
+  - Bet range: $1.00 - $1000.00
+  - 1:1 payout system
+  - XP and level progression
+- **Coming Soon**:
+  - Blackjack
+  - Lottery
+  - Wheel of Fortune
 
-## Installation
+### 👨💻 Admin Controls
+- View all registered users
+- Modify user balances
+- Administrative privileges
 
-### Prerequisites
+## 💻 Installation
 
-- A C compiler (e.g., GCC)
-- A terminal or command prompt
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/yourusername/casino-game-system.git
+   cd casino-game-system
 
-### Steps to Install
+2. **Compile Program**
+    ```bash
+      gcc index.c -o casino
+    
+3. **Run Application**
+   ```bash
+     ./casino
 
-1. **Clone the repository:**
-   ```git clone https://github.com/EjramWay/Telecom.git
+# 🕹️ Telecom Game Project
+
+## 📖 Usage
+
+### 🎮 Player Interface
+
+#### Main Menu:
+
+1. **View Stats** - Check balance, level, XP, and wins
+2. **Start Game** - Access game selection
+3. **Log Out**
+
+### 🔧 Admin Interface
+
+#### Admin Menu:
+
+1. **View All Users** - See complete user list
+2. **Modify Balances** - Adjust player funds (+/-)
+3. **Log Out**
+
+## 🎲 Gameplay Example
+
+```
+Coin Flip Game - Balance: $150.00
+Bet ($1.00-$1000.00): 50
+Heads (H) or Tails (T): h
+
+Coin landed: HEADS
+You won $50.00!
+New balance: $200.00
+Level Up! You are now level 2!
+```
+
+---
+
+## 📂 Data Storage
+
+- **File:** `users.txt`
+- **Format:**
+  ```
+  username password isAdmin balance xp level wins
+  ```
+
+---
+
+## 🔑 Key Constants
+
+```c
+#define STARTING_BALANCE 100.0
+#define BET_MINIMUM 1.0
+#define BET_MAXIMUM 1000.0
+#define MIN_PASSWORD_LENGTH 8
+```
+
+---
+
+## 📅 Future Plans
+
+- ✅ Implement Blackjack game logic
+- ✅ Add lottery number generator
+- ✅ Develop wheel-spin mechanics
+- ✅ Password encryption
+- ✅ Transaction history tracking
+- ✅ Graphical user interface
+
+---
+
+⚠️ **Note:** This is an educational project. Not associated with real gambling systems.
+
+---
 
 
-2. **Navigate to the project directory:**
-    ``` bash cd telecom-management-system
-
-3. **Compile the C code:**
-
-   ```bash gcc main.c -o telecom_management_system
 
 
-## Usage
-
-### For Users:
-- **Login:** Users can log in with their username and password.
-- **View Balance:** Once logged in, users can check their balance.
-
-### For Admins:
-- **Admin Login:** Admins can log in with their credentials and manage the balances of other users.
-- **Modify Balance:** Admins can add or subtract balances from a user's account.
-
-### Example:
-1. Register a new user with a username and password.
-2. Log in with the registered username and password.
-3. The system will display the balance, which starts at `0.00` for new users.
-4. Admins can modify the user's balance by adding or subtracting funds.
-
-## File Structure
-
-- **users.dat**: The file where user details, including usernames, passwords, roles, and balances, are stored.
-- **main.c**: The C source code file where all functionalities of the system are implemented.
-
-## Contributing
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-name`).
-3. Make your changes and commit them (`git commit -am 'Added feature'`).
-4. Push the changes to the branch (`git push origin feature-name`).
-5. Create a pull request.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
-
- 
+    

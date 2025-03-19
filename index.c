@@ -267,7 +267,7 @@ void playLotto(User *user) {
     float payout = 0.0f;
     switch (matches) {
         case 1:
-            payout = bet * 1.0f; // Break even
+            payout = bet * 1.5f;
             break;
         case 2:
             payout = bet * 2.0f;
@@ -284,9 +284,11 @@ void playLotto(User *user) {
         default:
             payout = 0.0f;
     }
+    
 
     if (matches > 0) {
-        user->balance += payout;
+
+        user->balance + payout;
         printf("Matched %d numbers! Payout: $%.2f. New balance: $%.2f\n", matches, payout, user->balance);
     } else {
         printf("No matches. Lost $%.2f. New balance: $%.2f\n", bet, user->balance);

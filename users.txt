@@ -1,0 +1,4 @@
+bilal Gvcf1254 0 50.00 0 1 0
+uiui Gvcf1254 0 10.00 40 1 4
+uiui Gvcf1254 0 10.00 40 1 4
+uiuiui Gvcf1254 0 100.00 0 1 0

@@ -35,6 +35,7 @@ void adminTerminal(User *loggedUser);
 void userTerminal(User *loggedUser);
 int validatePassword(const char *password);
 void saveUserData(const User *user);
+void playBlackjack(User *user);
 void playCoinFlip(User *user);
 void updateUserStats(User *user, int won, float betAmount);
 
@@ -200,6 +201,164 @@ void saveUserData(const User *user) {
 
 // GAMES
 
+void playBlackjack(User *user) {
+    if (user->balance < BET_MINIMUM) {
+        printf("You need at least $%.2f to play.\n", BET_MINIMUM);
+        return;
+    }
+
+    float bet;
+    do {
+        printf("Enter your bet amount (minimum $%.2f, maximum $%.2f): ", BET_MINIMUM, BET_MAXIMUM);
+        if (scanf("%f", &bet) != 1) {
+            printf("Invalid input. Please enter a number.\n");
+            while (getchar() != '\n'); // Clear input buffer
+            continue;
+        }
+        while (getchar() != '\n'); // Clear input buffer
+
+        if (bet < BET_MINIMUM || bet > BET_MAXIMUM) {
+            printf("Bet must be between $%.2f and $%.2f.\n", BET_MINIMUM, BET_MAXIMUM);
+        } else if (bet > user->balance) {
+            printf("Insufficient funds. Your balance is $%.2f.\n", user->balance);
+        }
+    } while (bet < BET_MINIMUM || bet > BET_MAXIMUM || bet > user->balance);
+
+    // Deduct the bet from the balance upfront
+    user->balance -= bet;
+    
+    // Define card values and deck
+    const char *suits[] = {"♥", "♦", "♣", "♠"};
+    const char *faces[] = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    int values[] = {11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10};
+    
+    int playerHand[10] = {0};
+    int dealerHand[10] = {0};
+    int playerCards = 0;
+    int dealerCards = 0;
+    int playerSum = 0;
+    int dealerSum = 0;
+    int playerAces = 0;
+    int dealerAces = 0;
+    
+    // Deal initial cards
+    for (int i = 0; i < 2; i++) {
+        int cardIndex = rand() % 13;
+        playerHand[playerCards++] = cardIndex;
+        playerSum += values[cardIndex];
+        if (cardIndex == 0) playerAces++;
+        
+        cardIndex = rand() % 13;
+        dealerHand[dealerCards++] = cardIndex;
+        dealerSum += values[cardIndex];
+        if (cardIndex == 0) dealerAces++;
+    }
+    
+    // Display initial hands
+    printf("\nDealer shows: %s%s [?]\n", faces[dealerHand[0]], suits[rand() % 4]);
+    printf("Your hand: ");
+    for (int i = 0; i < playerCards; i++) {
+        printf("%s%s ", faces[playerHand[i]], suits[rand() % 4]);
+    }
+    printf("(Total: %d)\n", playerSum);
+    
+    // Player's turn
+    char choice;
+    while (playerSum < 21) {
+        printf("Do you want to (H)it or (S)tand? ");
+        if (scanf(" %c", &choice) != 1) {
+            while (getchar() != '\n');
+            continue;
+        }
+        while (getchar() != '\n');
+        
+        if (choice == 'H' || choice == 'h') {
+            int cardIndex = rand() % 13;
+            playerHand[playerCards++] = cardIndex;
+            playerSum += values[cardIndex];
+            if (cardIndex == 0) playerAces++;
+            
+            // Handle aces
+            while (playerSum > 21 && playerAces > 0) {
+                playerSum -= 10;
+                playerAces--;
+            }
+            
+            printf("You drew: %s%s\n", faces[cardIndex], suits[rand() % 4]);
+            printf("Your hand: ");
+            for (int i = 0; i < playerCards; i++) {
+                printf("%s%s ", faces[playerHand[i]], suits[rand() % 4]);
+            }
+            printf("(Total: %d)\n", playerSum);
+            
+            if (playerSum > 21) {
+                printf("Bust! You lose $%.2f\n", bet);
+                printf("New balance: $%.2f\n", user->balance);
+                saveUserData(user);
+                return;
+            }
+        } else if (choice == 'S' || choice == 's') {
+            break;
+        } else {
+            printf("Invalid choice. Enter H or S.\n");
+        }
+    }
+    
+    // Dealer's turn
+    printf("\nDealer's hand: ");
+    for (int i = 0; i < dealerCards; i++) {
+        printf("%s%s ", faces[dealerHand[i]], suits[rand() % 4]);
+    }
+    printf("(Total: %d)\n", dealerSum);
+    
+    // Dealer hits until reaching at least 17
+    while (dealerSum < 17) {
+        int cardIndex = rand() % 13;
+        dealerHand[dealerCards++] = cardIndex;
+        dealerSum += values[cardIndex];
+        if (cardIndex == 0) dealerAces++;
+        
+        // Handle aces
+        while (dealerSum > 21 && dealerAces > 0) {
+            dealerSum -= 10;
+            dealerAces--;
+        }
+        
+        printf("Dealer draws: %s%s\n", faces[cardIndex], suits[rand() % 4]);
+        printf("Dealer's hand: ");
+        for (int i = 0; i < dealerCards; i++) {
+            printf("%s%s ", faces[dealerHand[i]], suits[rand() % 4]);
+        }
+        printf("(Total: %d)\n", dealerSum);
+    }
+    
+    // Determine winner
+    int won = 0;
+    if (dealerSum > 21) {
+        printf("Dealer busts! You win $%.2f!\n", bet);
+        won = 1;
+    } else if (playerSum > dealerSum) {
+        printf("You win $%.2f!\n", bet);
+        won = 1;
+    } else if (playerSum < dealerSum) {
+        printf("Dealer wins. You lose $%.2f.\n", bet);
+    } else {
+        printf("Push! Bet returned.\n");
+        user->balance += bet; // Return the bet
+    }
+    
+    if (won) {
+        updateUserStats(user, 1, bet * 2); // Double bet for win (original bet + winnings)
+    } else if (playerSum == dealerSum) {
+        // No stats update for push
+    } else {
+        updateUserStats(user, 0, 0); // Already deducted bet
+    }
+    
+    printf("New balance: $%.2f\n", user->balance);
+    saveUserData(user);
+}
+
 
 void playLotto(User *user) {
     if (user->balance < BET_MINIMUM) {
@@ -288,7 +447,7 @@ void playLotto(User *user) {
 
     if (matches > 0) {
 
-        user->balance + payout;
+        user->balance += payout;;
         printf("Matched %d numbers! Payout: $%.2f. New balance: $%.2f\n", matches, payout, user->balance);
     } else {
         printf("No matches. Lost $%.2f. New balance: $%.2f\n", bet, user->balance);
@@ -419,7 +578,7 @@ void userTerminal(User *loggedUser) {
                         playLotto(loggedUser);
                         break;
                     case 3:
-                        printf("BlackJack is under development.\n");
+                         playBlackjack(loggedUser);
                         break;
                     case 4:
                         printf("Spin The Wheel game is under development.\n");
@@ -596,12 +755,13 @@ int loginUser(const char *username, const char *password, User *loggedUser) {
 void UserGuide() {
     int GuideChoose;
 
-    printf("\nUser Guide Menu:\n");
-    printf("1. Coin Flip Game Guide\n");
-    printf("2. Lottery Game Guide\n");
-    printf("3. Adding Balance Guide\n");
-    printf("4. Forgot Username/Password Guide\n");
-    printf("5. Exit Guide\n");
+// Update the UserGuide menu to include Blackjack:
+printf("1. Coin Flip Game Guide\n");
+printf("2. Lottery Game Guide\n");
+printf("3. Adding Balance Guide\n");
+printf("4. Forgot Username/Password Guide\n");
+printf("5. Blackjack Game Guide\n");
+printf("6. Exit Guide\n"); 
     printf("Enter your choice: ");
     scanf("%d", &GuideChoose);
     while (getchar() != '\n');  // Clear input buffer
@@ -642,7 +802,22 @@ void UserGuide() {
             printf("3. Security: The admin may require you to verify your identity before providing any account information.\n");
             break;
 
-        case 5:
+  
+case 5:
+printf("\nBlackjack Game Guide:\n");
+printf("1. Check Your Balance: Ensure you have at least $1.00 in your account to play.\n");
+printf("2. Place Your Bet: Enter a bet amount between $1.00 and $1000.00.\n");
+printf("3. Initial Deal: You and the dealer each receive two cards. One of the dealer's cards is hidden.\n");
+printf("4. Card Values: Number cards are worth their face value, face cards (J, Q, K) are worth 10, and Aces are worth 11 or 1.\n");
+printf("5. Your Turn: Choose to 'Hit' (get another card) or 'Stand' (keep your current hand).\n");
+printf("6. Dealer's Turn: After you stand, the dealer reveals their hidden card and must hit until reaching at least 17.\n");
+printf("7. Winning: You win if your hand is closer to 21 than the dealer's without exceeding 21, or if the dealer busts.\n");
+printf("8. Losing: You lose if your hand exceeds 21 (bust) or if the dealer's hand is closer to 21 than yours.\n");
+printf("9. Push: If your hand equals the dealer's, the bet is returned (push).\n");
+break; 
+        
+
+        case 6:
             printf("Exiting User Guide.\n");
             return;
 
